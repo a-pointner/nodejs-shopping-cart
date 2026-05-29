@@ -1,7 +1,7 @@
 const Cart = require('../models/cart');
 
 describe('Cart Model - Add & Quantity Logic', () => {
-    
+
     // Test 1: First item in the cart
     test('Should correctly add a completely new item to the cart', () => {
         const cart = new Cart({});
@@ -74,4 +74,78 @@ describe('Cart Model - Add & Quantity Logic', () => {
         // We assert this to document the current model behavior accurately.
         expect(cart.totalPrice).toBeNaN();
     });
+
+    // Test 6: Total Cost - Correct price calculated
+    test('Should correctly calculate the total price of the cart', () => {
+        const cart = new Cart({});
+        const prod1 = { id: 'prod1', title: 'Apple', price: 1.50 };
+        const prod2 = { id: 'prod2', title: 'Banana', price: 2.00 };
+
+        cart.add(prod1, prod1.id);
+        cart.add(prod2, prod2.id);
+
+        expect(cart.totalPrice).toBe(3.50);
+    });
+
+    // Test 7: Floating Point - Correct price calculated
+    test('Should correctly handle floating point errors in the total price calculation', () => {
+        const cart = new Cart({});
+        const prod1 = { id: 'prod1', title: 'Apple', price: 9.99 };
+        const prod2 = { id: 'prod2', title: 'Banana', price: 9.99 };
+        const prod3 = { id: 'prod3', title: 'Orange', price: 9.99 };
+
+        cart.add(prod1, prod1.id);
+        cart.add(prod2, prod2.id);
+        cart.add(prod3, prod3.id);
+
+        expect(cart.totalPrice).toBe(29.97);
+    });
+
+    // Test 8: Remove Item - Correctly removes an item completely from the cart
+    test('Should correctly remove an item from the cart', () => {
+        const cart = new Cart({});
+        const prod1 = { id: 'prod1', title: 'Apple', price: 1.50 };
+
+        cart.add(prod1, prod1.id);
+        expect(cart.totalItems).toBe(1);
+
+        cart.remove(prod1.id);
+        expect(cart.totalItems).toBe(0);
+        expect(cart.totalPrice).toBe(0);
+        expect(cart.items[prod1.id]).toBeUndefined();
+    });
+
+    // Test 9: Get Items - Correctly returns an array of cart items
+    test('Should correctly return all items in the cart as an array', () => {
+        const cart = new Cart({});
+        const prod1 = { id: 'prod1', title: 'Apple', price: 1.50 };
+        const prod2 = { id: 'prod2', title: 'Banana', price: 2.00 };
+
+        cart.add(prod1, prod1.id);
+        cart.add(prod2, prod2.id);
+
+        const itemsArray = cart.getItems();
+
+        expect(Array.isArray(itemsArray)).toBe(true);
+        expect(itemsArray.length).toBe(2);
+        expect(itemsArray[0].item.title).toBeDefined();
+    });
+
+    // Test 10: Empty Cart Initialization - Verify defaults
+    test('Should initialize an empty cart with default zeroed values', () => {
+        const cart = new Cart({});
+        expect(cart.totalItems).toBe(0);
+        expect(cart.totalPrice).toBe(0);
+        expect(Object.keys(cart.items).length).toBe(0);
+        expect(cart.getItems().length).toBe(0);
+    });
+
+    // Test 11: Remove non-existing item - Should not throw an error - Test fails so model must be improved
+    test('Should not throw any error so removal funciton is resilient', () => {
+        const cart = new Cart({});
+        expect(() => {
+            cart.remove('non-existing');
+        }).not.toThrow();
+    });
+
 });
