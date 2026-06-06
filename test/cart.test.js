@@ -61,21 +61,20 @@ describe('Cart Model - Add & Quantity Logic', () => {
         expect(cart.items['prod1'].quantity).toBe(3);
     });
 
-    // Test 5: Edge Case - Incomplete product data
-    test('Should handle a product with missing required fields robustly', () => {
+    // Test 5: Edge Case - try to add incomplete product data
+    test('Should not add a product with missing required fields', () => {
         const cart = new Cart({});
         const brokenProduct = { id: 'prod_broken', title: 'Broken Item' }; // Price is missing!
 
         cart.add(brokenProduct, brokenProduct.id);
 
-        expect(cart.totalItems).toBe(1);
-        expect(cart.items['prod_broken']).toBeDefined();
-        // The model calculates 'undefined * 1', resulting in NaN.
-        // We assert this to document the current model behavior accurately.
-        expect(cart.totalPrice).toBeNaN();
+        expect(cart.totalItems).toBe(0);
     });
+});
 
-    // Test 6: Total Cost - Correct price calculated
+describe('Cart Model - Pricecalculation & Remove Logic', () => {
+
+    // Test 1: Total Cost - Correct price calculated
     test('Should correctly calculate the total price of the cart', () => {
         const cart = new Cart({});
         const prod1 = { id: 'prod1', title: 'Apple', price: 1.50 };
@@ -87,7 +86,7 @@ describe('Cart Model - Add & Quantity Logic', () => {
         expect(cart.totalPrice).toBe(3.50);
     });
 
-    // Test 7: Floating Point - Correct price calculated
+    // Test 2: Floating Point - Correct price calculated
     test('Should correctly handle floating point errors in the total price calculation', () => {
         const cart = new Cart({});
         const prod1 = { id: 'prod1', title: 'Apple', price: 9.99 };
@@ -101,7 +100,7 @@ describe('Cart Model - Add & Quantity Logic', () => {
         expect(cart.totalPrice).toBe(29.97);
     });
 
-    // Test 8: Remove Item - Correctly removes an item completely from the cart
+    // Test 3: Remove Item - Correctly removes an item completely from the cart
     test('Should correctly remove an item from the cart', () => {
         const cart = new Cart({});
         const prod1 = { id: 'prod1', title: 'Apple', price: 1.50 };
@@ -115,7 +114,7 @@ describe('Cart Model - Add & Quantity Logic', () => {
         expect(cart.items[prod1.id]).toBeUndefined();
     });
 
-    // Test 9: Get Items - Correctly returns an array of cart items
+    // Test 4: Get Items - Correctly returns an array of cart items
     test('Should correctly return all items in the cart as an array', () => {
         const cart = new Cart({});
         const prod1 = { id: 'prod1', title: 'Apple', price: 1.50 };
@@ -131,7 +130,7 @@ describe('Cart Model - Add & Quantity Logic', () => {
         expect(itemsArray[0].item.title).toBeDefined();
     });
 
-    // Test 10: Empty Cart Initialization - Verify defaults
+    // Test 5: Empty Cart Initialization - Verify defaults
     test('Should initialize an empty cart with default zeroed values', () => {
         const cart = new Cart({});
         expect(cart.totalItems).toBe(0);
@@ -140,7 +139,7 @@ describe('Cart Model - Add & Quantity Logic', () => {
         expect(cart.getItems().length).toBe(0);
     });
 
-    // Test 11: Remove non-existing item - Should not throw an error - Test fails so model must be improved
+    // Test 6: Remove non-existing item - Should not throw an error - Test fails so model must be improved
     test('Should not throw any error so removal funciton is resilient', () => {
         const cart = new Cart({});
         expect(() => {
