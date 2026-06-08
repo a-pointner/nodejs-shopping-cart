@@ -1,84 +1,110 @@
-const router = require('../routes/index');
+const request = require('supertest');
+const app = require('../app');
+const fs = require('fs');
+const path = require('path');
 
-/**
- * Helper function to extract a specific route handler from the Express router stack.
- * Since we are not using Supertest, we need to access the internal 'stack' of the router
- * to get the actual function (handler) that processes the request.
- * 'router.stack' is an internal Express array containing all defined routes.
- */
-function getHandler(path, method = 'get') {
-    const route = router.stack.find(s => s.route && s.route.path === path && s.route.methods[method]);
-    return route.route.stack[0].handle;
-}
+const products = JSON.parse(fs.readFileSync(path.join(__dirname, '../data/products.json'), 'utf8'));
+const validProduct = products[0];
 
-describe('Endpoint Integration Tests (Without Supertest)', () => {
-    let req, res, next;
+describe('Integration Tests - Express Routes & Session Flow', () => {
 
-    /**
-     * Set up mocks before each test. 
-     * 'jest.fn()' creates mock functions that allow us to track calls and arguments.
-     * We use these to simulate the 'res.render' and 'res.redirect' methods of Express.
-     */
-    beforeEach(() => {
-        req = {
-            params: {},
-            session: {}
-        };
-        res = {
-            render: jest.fn(),
-            redirect: jest.fn(),
-            locals: {}
-        };
-        next = jest.fn();
-    });
+    // =========================================================================
+    // Core Infrastructure & Read Routes (Catalog & Views)
+    // =========================================================================
 
-    // Test 1: Index Page
-    test('Index Handler should render "index" with products from JSON', () => {
-        const handler = getHandler('/');
-        handler(req, res, next);
-
-        // Verify that res.render was called with the correct view name and data
-        expect(res.render).toHaveBeenCalledWith('index', expect.objectContaining({
-            title: 'NodeJS Shopping Cart',
-            products: expect.any(Array)
-        }));
-
-        // Verify that the data contains real product info (e.g., Apples)
-        const renderArgs = res.render.mock.calls[0][1];
-        expect(renderArgs.products[0].title).toBe('Apples');
-    });
-
-    // Test 2: Add Product (Redirect & Session Initialization)
-    test('Add Handler should create a cart in session and redirect to /', () => {
-        const handler = getHandler('/add/:id');
-        req.params.id = '1'; // Simulate adding Apples
-
-        handler(req, res, next);
-
-        // Verify redirection and session updates
-        expect(res.redirect).toHaveBeenCalledWith('/');
-        expect(req.session.cart).toBeDefined();
-        expect(req.session.cart.totalItems).toBe(1);
-        expect(req.session.cart.totalPrice).toBe(25);
-    });
-
-    // Test 3: Increment Quantity (Route + Session Integration)
-    test('Add Handler should increment quantity in existing session', () => {
-        const handler = getHandler('/add/:id');
-        req.params.id = '1';
+    // Test 1: Catalog View
+    test('GET / should fetch products from JSON and render homepage', async () => {
+        const response = await request(app).get('/');
         
-        // Simulate a session that already contains one item
-        req.session.cart = {
-            items: { '1': { item: { id: 1, price: 25 }, quantity: 1, price: 25 } },
-            totalItems: 1,
-            totalPrice: 25
-        };
+        expect(response.statusCode).toBe(200);
+        expect(response.text).toContain('NodeJS Shopping Cart');
+        expect(response.text).toContain(validProduct.title);
+    });
 
-        handler(req, res, next);
+    // Test 2: Initial Cart View (Empty)
+    test('GET /cart should render empty state text when no session exists', async () => {
+        const response = await request(app).get('/cart');
+        
+        expect(response.statusCode).toBe(200);
+        expect(response.text).toContain('Your shopping cart is empty.');
+    });
 
-        // Verify that the existing item was updated correctly
-        expect(req.session.cart.totalItems).toBe(2);
-        expect(req.session.cart.items['1'].quantity).toBe(2);
-        expect(req.session.cart.totalPrice).toBe(50);
+    // Test 3: Active Cart View (Populated)
+    test('GET /cart should dynamically render items stored in session (add)', async () => {
+        const agent = request.agent(app);
+        
+        await agent.get(`/add/${validProduct.id}`);
+        
+        const response = await agent.get('/cart');
+        expect(response.statusCode).toBe(200);
+        expect(response.text).toContain(validProduct.title);
+        expect(response.text).toContain(`Total: ${validProduct.price}`);
+    });
+
+    // Test 4: Active Cart View (Empty)
+    test('GET /cart should dynamically render items stored in session (remove)', async () => {
+        const agent = request.agent(app);
+        
+        await agent.get(`/add/${validProduct.id}`);
+        await agent.get(`/remove/${validProduct.id}`);
+        
+        const response = await agent.get('/cart');
+        expect(response.statusCode).toBe(200);
+        expect(response.text).toContain('Your shopping cart is empty.');
+    });
+
+
+    // =========================================================================
+    // State Mutations & Error Boundaries (Add, Remove & Edge Cases)
+    // =========================================================================
+
+    // Test 5: Mutation via Addition
+    test('GET /add/:id should mutate session state and redirect to /', async () => {
+        const agent = request.agent(app);
+        
+        const response = await agent.get(`/add/${validProduct.id}`);
+        
+        expect(response.statusCode).toBe(302);
+        expect(response.headers['location']).toBe('/');
+        expect(response.headers['set-cookie']).toBeDefined();
+    });
+
+    // Test 6: Mutation via Removal
+    test('GET /remove/:id should mutate session state and redirect to /cart', async () => {
+        const agent = request.agent(app);
+        
+        await agent.get(`/add/${validProduct.id}`);
+        
+        const response = await agent.get(`/remove/${validProduct.id}`);
+        
+        expect(response.statusCode).toBe(302);
+        expect(response.headers['location']).toBe('/cart');
+    });
+
+    // Test 7: Edge Case (Invalid Payload/ID)
+    test('GET /add/999 with non-existent ID should throw an internal server error', async () => {
+        const response = await request(app).get('/add/999');
+        
+        expect(response.statusCode).toBe(500);
+        // It would be better if the server handled such cases more effectively and
+        // does not return a 5xx error code.
+    });
+
+    // Test 8: Edge Case (Invalid Payload/ID)
+    test('GET /remove/999 with non-existent ID should throw an internal server error', async () => {
+        const response = await request(app).get('/remove/999');
+        
+        expect(response.statusCode).toBe(500);
+        // It would be better if the server handled such cases more effectively and
+        // does not return a 5xx error code.
+    });
+
+    // Test 9: Edge Case (Removal without existing item/cart)
+    test('GET /remove/:id when item is not in cart should throw an internal server error due to missing checks', async () => {
+        const response = await request(app).get(`/remove/${validProduct.id}`);
+        
+        expect(response.statusCode).toBe(500);
+        // It would be better if the server handled such cases more effectively and
+        // does not return a 5xx error code.
     });
 });
