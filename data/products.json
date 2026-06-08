@@ -21,6 +21,6 @@
     "id": 4,
     "title": "Papayas",
     "description": "Papayas are <span class=\"label label-info\">50 CHF each</span>, but are <span class=\"label label-warning\">available as 3 for the price of 2</span>",
-    "price": 100
+    "price": 50
   }
 ]
