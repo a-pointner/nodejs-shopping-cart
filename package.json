@@ -26,5 +26,10 @@
     "jest": "^30.4.2",
     "nodemon": "^1.11.0",
     "supertest": "^7.2.2"
+  },
+  "jest": {
+    "testPathIgnorePatterns": [
+      "/test-e2e/"
+    ]
   }
 }
