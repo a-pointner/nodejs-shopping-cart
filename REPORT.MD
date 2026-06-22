@@ -25,11 +25,19 @@ Beschreiben -> Testbeschreibung, Loadtests (Art, Zweck) + visualisieren und anal
 Um eine hohe Code-Qualität und Stabilität der Applikation zu gewährleisten, verfolgen wir einen zweigeteilten Testansatz, der auf dem Prinzip der Testpyramide basiert:
 
 #### Unit- & Integration-Tests (Jest):
-**Zweck:** Validierung der Geschäftslogik und des Routings in einer isolierten Node.js-Umgebung.
+**Zweck:** Validierung der Geschäftslogik `models/cart.js` und des Routings `index.js` in einer isolierten Node.js-Umgebung.
 
 **Framework:** Jest fungiert als Test-Runner und Assertion-Library. Es prüft die Kernlogik des Warenkorb-Modells (models/cart.js) und die Express-Routen unabhängig vom Frontend.
 
 **Vorteil:** Schnelle Ausführung ("Fast Feedback Loop"), ideal für die CI/CD-Pipeline zur sofortigen Erkennung von Regressionsfehlern.
+
+**Ausführung:** `npm test` \
+Die Test-Suite zeigt aktuell zwei fehlschlagende Unit-Tests. Dieses Verhalten ist beabsichtigt und dokumentiert bewusst Schwachstellen in der aktuellen Implementierung des models/cart.js, die wir als Optimierungspotenzial identifiziert haben:
+ * Datenvalidierung beim Hinzufügen: Aktuell erlaubt das Modell das Hinzufügen von unvollständigen Objekten (z. B. Produkte ohne Preis). Der fehlschlagende Test validiert die Anforderung, dass das Modell solche inkonsistenten Daten vor der Aufnahme in den Warenkorb zwingend ablehnen muss.
+
+ * Fehlertoleranz bei Löschvorgängen: Die Implementierung wirft derzeit einen Fehler, wenn versucht wird, ein nicht existierendes Produkt aus dem Warenkorb zu entfernen. Der Test definieren hier das Ziel einer höheren Fehlertoleranz, bei der das System derartige Anfragen ohne Ausnahmebehandlung (Exception) sicher abfängt.
+
+![npm test Ergebnis](/data/npm_test_result.png)
 
 #### System- & E2E-Tests (Playwright):
 **Zweck:** Validierung der vollständigen "User Journeys" aus der Perspektive eines echten Anwenders.
@@ -41,18 +49,21 @@ Um eine hohe Code-Qualität und Stabilität der Applikation zu gewährleisten, v
 ### Lasttests mit k6:
 Um die Stabilität unter Last zu verifizieren, haben wir Lasttests mit Grafana k6 implementiert.
 
-**Spike Test:** Um das Antwortverhalten der Anwendung unter Last zu validieren, haben wir Spike-Tests mit inkrementell steigenden Nutzerzahlen durchgeführt. Als zentrale Kennzahl dient dabei der p95-Wert, der angibt, dass 95 % aller Anfragen innerhalb dieses Zeitfensters erfolgreich verarbeitet wurden. Dieser Wert bietet ein realistisches Bild der User Experience, da er Ausreißer sinnvoll ausklammert.
+**Spike Test:** \
+Um das Antwortverhalten der Anwendung unter Last zu validieren, haben wir Spike-Tests mit inkrementell steigenden Nutzerzahlen durchgeführt. Als zentrale Kennzahl dient dabei der p95-Wert, der angibt, dass 95 % aller Anfragen innerhalb dieses Zeitfensters erfolgreich verarbeitet wurden. Dieser Wert bietet ein realistisches Bild der User Experience, da er Ausreißer sinnvoll ausklammert.
 
 ![p95 Diagramm](/data/spike-test-p95-diagram.png)
 
 Die Testergebnisse zeigen ein klares Skalierungsverhalten: Während die Anwendung bis zu einem Schwellenwert von 500 Nutzern eine exzellente Performance liefert, beginnt ab diesem Punkt eine messbare Degradation. Mit steigender Nutzerzahl nimmt die Sättigung des Node.js-Event-Loops zu, was die Antwortzeiten sukzessive ansteigen lässt. Ab einer Last von 1.500 Nutzern überschreitet die Latenz die 500-ms-Marke, wodurch die Anwendung für Endanwender spürbar träger reagiert.
 
 ![3000 Nutzer Test Ergebnis](/data/spike_3000-test-result.png)
+
 Bei einem Test mit 3.000 gleichzeitigen Nutzern erreichte das System schließlich seinen sogenannten Breaking Point. Die Fehlerrate stieg auf 9,65 % an, was auf eine Überlastung der Server-Ressourcen hindeutet.
 
 Zusammenfassend lässt sich festhalten, dass die Architektur für Szenarien bis 500 Nutzer optimal ausgelegt ist. Das Erreichen der Belastungsgrenze bei 3.000 Nutzern liefert wertvolle Erkenntnisse für den Betrieb: Für eine Skalierung auf höhere Lastspitzen wäre der Einsatz von Load-Balancing oder anderer Maßnahmen notwendig.
 
-**Soak Test:** Wir führten einen 10-minütigen Dauertest durch, um die Stabilität des RAM-basierten Session-Managements zu prüfen. Da der Speicherverbrauch konstant blieb, konnte der Ausschluss von Memory Leaks im Session-Handling nachgewiesen werden.
+**Soak Test:** \
+ Wir führten einen 10-minütigen Dauertest durch, um die Stabilität des RAM-basierten Session-Managements zu prüfen. Da der Speicherverbrauch konstant blieb, konnte der Ausschluss von Memory Leaks im Session-Handling nachgewiesen werden.
 
 ### CI/CD Pipeline & Test-Ausführung
 Zur Automatisierung des Testprozesses und zur Qualitätssicherung bei jeder Code-Änderung wurden zwei spezialisierte GitHub Actions Pipelines implementiert:
