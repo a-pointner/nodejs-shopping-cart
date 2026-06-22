@@ -11,7 +11,9 @@ Genutzte KI-Werkzeuge:
  ---
 
 ## Beschreibung der Web-Anwendung:
-TODO
+Die Webanwendung basiert auf einem Node.js-Backend mit dem Express-Framework und dient als funktionaler Warenkorb-Prototyp. Das Projekt demonstriert das Zusammenspiel von serverseitigem Routing, Middleware-basiertem Session-Handling und template-basierter Frontend-Logik mittels Handlebars (HBS).
+
+Die Anwendungsarchitektur ist dabei modular gegliedert. Zentral für die Logik sind insbesondere das Warenkorb-Modell `models/cart.js`, welches die Datenintegrität bei Session-Mutationen sicherstellt, sowie die Express-Routen `routes/index.js`, die für das Routing der HTTP-Anfragen verantwortlich sind. Da die Datenhaltung ausschließlich im RAM erfolgt und auf eine persistente Datenbank verzichtet wird, stellt die Validierung dieser zuvor erwähnten Komponenten den Kern unserer Teststrategie dar.
 
 ---
 
