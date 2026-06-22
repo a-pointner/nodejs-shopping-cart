@@ -32,6 +32,13 @@ Um eine hohe Code-Qualität und Stabilität der Applikation zu gewährleisten, v
 **Vorteil:** Schnelle Ausführung ("Fast Feedback Loop"), ideal für die CI/CD-Pipeline zur sofortigen Erkennung von Regressionsfehlern.
 
 **Ausführung:** `npm test` \
+Der Fokus dieser Tests lag auf folgenden Kernaspekten:
+* Warenkorb-Logik (Unit-Tests): Isolierte Überprüfung des Cart-Modells, insbesondere die korrekte Preis- und Mengenberechnung, das Hinzufügen und Entfernen von Produkten sowie die Reinitialisierung aus bestehenden Sessions. 
+
+* Routen & Session-Flow (Integrationstests): Sicherstellung, dass die Endpunkte die entsprechenden Ansichten korrekt rendern und Statusänderungen (wie das Hinzufügen oder Entfernen von Artikeln) erfolgreich in der Session persistieren.  
+
+* Edge Cases & Fehlerbehandlung: Überprüfung des Systemverhaltens bei unvorhergesehenen Operationen, wie etwa dem Hinzufügen von unvollständigen Produktdaten oder dem Aufruf ungültiger Produkt-IDs in den Routen.  
+
 Die Test-Suite zeigt aktuell zwei fehlschlagende Unit-Tests. Dieses Verhalten ist beabsichtigt und dokumentiert bewusst Schwachstellen in der aktuellen Implementierung des models/cart.js, die wir als Optimierungspotenzial identifiziert haben:
  * Datenvalidierung beim Hinzufügen: Aktuell erlaubt das Modell das Hinzufügen von unvollständigen Objekten (z. B. Produkte ohne Preis). Der fehlschlagende Test validiert die Anforderung, dass das Modell solche inkonsistenten Daten vor der Aufnahme in den Warenkorb zwingend ablehnen muss.
 
