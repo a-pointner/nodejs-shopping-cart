@@ -37,7 +37,7 @@ Die Test-Suite zeigt aktuell zwei fehlschlagende Unit-Tests. Dieses Verhalten is
 
  * Fehlertoleranz bei Löschvorgängen: Die Implementierung wirft derzeit einen Fehler, wenn versucht wird, ein nicht existierendes Produkt aus dem Warenkorb zu entfernen. Der Test definieren hier das Ziel einer höheren Fehlertoleranz, bei der das System derartige Anfragen ohne Ausnahmebehandlung (Exception) sicher abfängt.
 
-![npm test Ergebnis](/data/npm_test_result.png)
+![Unit- & Integration-Test Ergebnis](/data/npm_test_result.png)
 
 #### System- & E2E-Tests (Playwright):
 **Zweck:** Validierung der vollständigen "User Journeys" aus der Perspektive eines echten Anwenders.
@@ -45,6 +45,16 @@ Die Test-Suite zeigt aktuell zwei fehlschlagende Unit-Tests. Dieses Verhalten is
 **Framework:** Playwright automatisiert den gesamten Browser-Stack (Chromium, Firefox, WebKit). Es simuliert echte Benutzerinteraktionen wie das Hinzufügen von Artikeln, Warenkorb-Navigation und Session-Persistenz.
 
 **Vorteil:** Deckt die Brücke zwischen Frontend und Backend ab. Es stellt sicher, dass die Applikation trotz des dynamischen Session-Managements im Browser wie erwartet funktioniert.
+
+**Ausführung:** `npx playwright test` \
+Die E2E-Tests verlaufen vollständig fehlerfrei und bestätigen die korrekte Funktionalität der Anwendung aus Anwendersicht. Der Fokus dieser Tests lag auf den kritischen Kernprozessen der Applikation:
+ * Navigationsfluss: Sicherstellung der korrekten Navigation innerhalb der Anwendung.
+
+ * Warenkorb-Interaktionen: Überprüfung der Funktionalität beim Hinzufügen und Entfernen von Produkten aus dem Warenkorb.
+
+* Persistenz: Validierung der Session-Verwaltung, um zu gewährleisten, dass der Warenkorb-Inhalt auch nach einem     Neuladen der Seite konsistent erhalten bleibt.
+
+![E2E Test Ergebnis](/data/npx_playwright_test_result.png)
 
 ### Lasttests mit k6:
 Um die Stabilität unter Last zu verifizieren, haben wir Lasttests mit Grafana k6 implementiert.
