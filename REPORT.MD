@@ -79,9 +79,16 @@ Bei einem Test mit 3.000 gleichzeitigen Nutzern erreichte das System schließlic
 
 Zusammenfassend lässt sich festhalten, dass die Architektur für Szenarien bis 500 Nutzer optimal ausgelegt ist. Das Erreichen der Belastungsgrenze bei 3.000 Nutzern liefert wertvolle Erkenntnisse für den Betrieb: Für eine Skalierung auf höhere Lastspitzen wäre der Einsatz von Load-Balancing oder anderer Maßnahmen notwendig.
 
-**Soak Test:** \
- Wir führten einen 10-minütigen Dauertest durch, um die Stabilität des RAM-basierten Session-Managements zu prüfen. Da der Speicherverbrauch konstant blieb, konnte der Ausschluss von Memory Leaks im Session-Handling nachgewiesen werden.
+**Stress Test:** \
+Wir führten einen Stress Test aus der die Applikation in mehreren Schritten zunehmend an ihre Grenzen bringt. Es wurde festgelegt dass der p95 Wert unter 1000ms sein soll. Bei einer Fehlerrate von 5% schlägt der Test fehl.
+Dieser Test soll herausfinden ab wann die Applikation an ihre Grenzen kommt.
 
+Resultate des Stress Test:
+![stress-test-result.png](data/stress-test-result.png)
+Der Server konnte nicht mehr als ~2.000 Requests pro Sekunde verarbeiten. Ab diesem Punkt brachten zusätzliche Nutzer keinen höheren Durchsatz mehr, sondern nur längere Antwortzeiten.
+![stress-test-requestDuration-requestRate.png](data/stress-test-requestDuration-requestRate.png)
+Der Durchsatz (grün) sättigt bei ~2.000 req/s, während die Antwortzeit p95 (blau) unter wachsender Last auf ~2 s steigt. Die Fehlerrate bleibt bei 0 %.
+![stress-test-result-overview.png](data/stress-test-result-overview.png)
 ### CI/CD Pipeline & Test-Ausführung
 Zur Automatisierung des Testprozesses und zur Qualitätssicherung bei jeder Code-Änderung wurden zwei spezialisierte GitHub Actions Pipelines implementiert:
 
