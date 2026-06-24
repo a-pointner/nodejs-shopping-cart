@@ -74,7 +74,7 @@ describe('Cart Model - Add & Quantity Logic', () => {
 
 describe('Cart Model - Pricecalculation & Remove Logic', () => {
 
-    // Test 1: Total Cost - Correct price calculated
+    // Test 6: Total Cost - Correct price calculated
     test('Should correctly calculate the total price of the cart', () => {
         const cart = new Cart({});
         const prod1 = { id: 'prod1', title: 'Apple', price: 1.50 };
@@ -86,7 +86,7 @@ describe('Cart Model - Pricecalculation & Remove Logic', () => {
         expect(cart.totalPrice).toBe(3.50);
     });
 
-    // Test 2: Floating Point - Correct price calculated
+    // Test 7: Floating Point - Correct price calculated
     test('Should correctly handle floating point errors in the total price calculation', () => {
         const cart = new Cart({});
         const prod1 = { id: 'prod1', title: 'Apple', price: 9.99 };
@@ -100,7 +100,7 @@ describe('Cart Model - Pricecalculation & Remove Logic', () => {
         expect(cart.totalPrice).toBe(29.97);
     });
 
-    // Test 3: Remove Item - Correctly removes an item completely from the cart
+    // Test 8: Remove Item - Correctly removes an item completely from the cart
     test('Should correctly remove an item from the cart', () => {
         const cart = new Cart({});
         const prod1 = { id: 'prod1', title: 'Apple', price: 1.50 };
@@ -114,7 +114,7 @@ describe('Cart Model - Pricecalculation & Remove Logic', () => {
         expect(cart.items[prod1.id]).toBeUndefined();
     });
 
-    // Test 4: Get Items - Correctly returns an array of cart items
+    // Test 9: Get Items - Correctly returns an array of cart items
     test('Should correctly return all items in the cart as an array', () => {
         const cart = new Cart({});
         const prod1 = { id: 'prod1', title: 'Apple', price: 1.50 };
@@ -130,7 +130,7 @@ describe('Cart Model - Pricecalculation & Remove Logic', () => {
         expect(itemsArray[0].item.title).toBeDefined();
     });
 
-    // Test 5: Empty Cart Initialization - Verify defaults
+    // Test 10: Empty Cart Initialization - Verify defaults
     test('Should initialize an empty cart with default zeroed values', () => {
         const cart = new Cart({});
         expect(cart.totalItems).toBe(0);
@@ -139,8 +139,8 @@ describe('Cart Model - Pricecalculation & Remove Logic', () => {
         expect(cart.getItems().length).toBe(0);
     });
 
-    // Test 6: Remove non-existing item - Should not throw an error - Test fails so model must be improved
-    test('Should not throw any error so removal funciton is resilient', () => {
+    // Test 11: Remove non-existing item - Should not throw an error - Test fails so model must be improved
+    test('Should not throw any error so removal function is not resilient', () => {
         const cart = new Cart({});
         expect(() => {
             cart.remove('non-existing');

@@ -31,7 +31,7 @@ describe('Integration Tests - Express Routes & Session Flow', () => {
 
     // Test 3: Active Cart View (Populated)
     test('GET /cart should dynamically render items stored in session (add)', async () => {
-        const agent = request.agent(app);
+        const agent = request.agent(app); // hold the session
         
         await agent.get(`/add/${validProduct.id}`);
         
