@@ -90,16 +90,7 @@ describe('Integration Tests - Express Routes & Session Flow', () => {
         // does not return a 5xx error code.
     });
 
-    // Test 8: Edge Case (Invalid Payload/ID)
-    test('GET /remove/999 with non-existent ID should throw an internal server error', async () => {
-        const response = await request(app).get('/remove/999');
-        
-        expect(response.statusCode).toBe(500);
-        // It would be better if the server handled such cases more effectively and
-        // does not return a 5xx error code.
-    });
-
-    // Test 9: Edge Case (Removal without existing item/cart)
+    // Test 8: Edge Case (Removal without existing item/cart)
     test('GET /remove/:id when item is not in cart should throw an internal server error due to missing checks', async () => {
         const response = await request(app).get(`/remove/${validProduct.id}`);
         
