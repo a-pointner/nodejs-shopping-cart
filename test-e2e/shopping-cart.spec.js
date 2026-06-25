@@ -49,14 +49,20 @@ test.describe('NodeJS Shopping Cart E2E Tests', () => {
     await expect(page.locator('.list-group-item')).toBeVisible();
   });
 
-  test('Empty cart navigation logic', async ({ page }) => {
-    // Verify that the application logic handles uninitialized sessions 
-    // without triggering runtime errors when accessing the cart route
-    await page.goto(`${BASE_URL}/cart`);
-    
-    // Validate the home link redirection to ensure correct circular navigation
+  test('Adding the same product twice increments its quantity', async ({ page }) => {
     await page.goto(`${BASE_URL}/`);
-    
-    await expect(page).toHaveURL(/.*\//);
+
+    // Add the first product
+    await page.click('a[href^="/add/"] >> nth=0');
+    await page.click('a[href^="/add/"] >> nth=0');
+
+    await page.goto(`${BASE_URL}/cart`);
+
+    // The cart must still contain exactly one item (no duplicate entry)...
+    const items = page.locator('.list-group-item');
+    await expect(items).toHaveCount(1);
+
+    // quantity badge must read "2".
+    await expect(items.first().locator('.badge')).toHaveText('2');
   });
 });
