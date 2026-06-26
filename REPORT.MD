@@ -7,6 +7,7 @@ Projektmitglieder:
 Genutzte KI-Werkzeuge:
  * Gemini Chat (für Dokumentation und Erklärungen)
  * Gemini CLI (für Test-Idee-Erzeugung)
+ * Claude (für Powerpoint)
  
  ---
 
@@ -18,9 +19,6 @@ Die Anwendungsarchitektur ist dabei modular gegliedert. Zentral für die Logik s
 ---
 
 ## Test Setup:
-TODO:
-Beschreiben -> Testbeschreibung, Loadtests (Art, Zweck) + visualisieren und analysieren Sie die daraus resultierenden Ergebnisse
-
 ### Teststrategie & Frameworks
 Um eine hohe Code-Qualität und Stabilität der Applikation zu gewährleisten, verfolgen wir einen zweigeteilten Testansatz, der auf dem Prinzip der Testpyramide basiert:
 
