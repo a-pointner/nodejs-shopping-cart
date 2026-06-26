@@ -86,8 +86,7 @@ describe('Integration Tests - Express Routes & Session Flow', () => {
         const response = await request(app).get('/add/999');
         
         expect(response.statusCode).toBe(500);
-        // It would be better if the server handled such cases more effectively and
-        // does not return a 5xx error code.
+        // It would be better if the server handled such cases more effectively and does not return a 5xx error code.
     });
 
     // Test 8: Edge Case (Removal without existing item/cart)
@@ -95,7 +94,6 @@ describe('Integration Tests - Express Routes & Session Flow', () => {
         const response = await request(app).get(`/remove/${validProduct.id}`);
         
         expect(response.statusCode).toBe(500);
-        // It would be better if the server handled such cases more effectively and
-        // does not return a 5xx error code.
+        // It would be better if the server handled such cases more effectively and does not return a 5xx error code.
     });
 });
